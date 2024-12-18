@@ -881,6 +881,7 @@
 
         // Sayfa yüklendiğinde müziği otomatik başlat
         window.addEventListener('load', () => {
+            // Müziği başlat
             gameMusic.play().catch(error => {
                 console.log("Müzik otomatik başlatılamadı:", error);
             });
@@ -931,6 +932,14 @@
                     welcomeScreen.style.display = 'none';
                     gameContent.style.display = 'block';
                 }, 500);
+                
+                // Müziği başlat
+                audio.play().then(() => {
+                    icon.className = 'fas fa-volume-up';
+                    isMusicPlaying = true;
+                }).catch(error => {
+                    console.log("Müzik başlatılamadı:", error);
+                });
             });
 
             startGameButton.addEventListener('click', function() {
