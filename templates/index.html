@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Raccoons Word Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #4f46e5;
+            --success-color: #22c55e;
+            --error-color: #ef4444;
+            --background-color: #f8fafc;
+            --card-background: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+        }
+
+        .cover-image {
+            width: 100%;
+            max-width: 800px;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 20px;
+            margin: 20px auto;
+            animation: coverGlow 3s ease-in-out infinite alternate;
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.3);
+            display: block;
+        }
+
+        @keyframes coverGlow {
+            from {
+                box-shadow: 0 0 30px rgba(255, 0, 255, 0.3),
+                           0 0 50px rgba(255, 0, 255, 0.2),
+                           0 0 70px rgba(255, 0, 255, 0.1);
+            }
+            to {
+                box-shadow: 0 0 40px rgba(0, 255, 255, 0.3),
+                           0 0 60px rgba(0, 255, 255, 0.2),
+                           0 0 80px rgba(0, 255, 255, 0.1);
+            }
+        }
+
+        .logo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: -50px auto 20px;
+            display: block;
+            position: relative;
+            z-index: 2;
+            animation: logoGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes logoGlow {
+            from {
+                box-shadow: 0 0 20px rgba(255, 0, 255, 0.4),
+                           0 0 40px rgba(255, 0, 255, 0.2);
+            }
+            to {
+                box-shadow: 0 0 30px rgba(0, 255, 255, 0.4),
+                           0 0 50px rgba(0, 255, 255, 0.2);
+            }
+        }
+
+        .content-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header {
+            text-align: center;
+            margin: 3rem 0 1.5rem;
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            text-shadow: 0 2px 4px rgba(99, 102, 241, 0.1);
+        }
+
+        .game-container {
+            background: var(--card-background);
+            padding: 2rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin: 2rem auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 300px;
+            justify-content: center;
+        }
+
+        #gameArea {
+            width: 100%;
+            display: none;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .word-display {
+            font-size: 2.5rem;
+            letter-spacing: 0.5rem;
+            margin: 2rem 0;
+            font-weight: 500;
+            color: var(--text-primary);
+            text-align: center;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        input[type="text"] {
+            background: white;
+            border: 2px solid #e2e8f0;
+            color: var(--text-primary);
+            padding: 0.8rem 1.5rem;
+            border-radius: 0.75rem;
+            width: 100%;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        button {
+            padding: 0.8rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: white;
+            background: var(--primary-color);
+            border: none;
+            border-radius: 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        button:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        #startGame {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            width: 80%;
+            max-width: 300px;
+            margin: 1rem auto;
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        .message.success {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success-color);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .message.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error-color);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 640px) {
+            .game-container {
+                width: 95%;
+                padding: 1.5rem;
+            }
+
+            .word-display {
+                font-size: 2rem;
+            }
+
+            .input-container {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+
+        .neon-raccoon {
+            position: fixed;
+            width: 150px;
+            height: 150px;
+            top: 50%;
+            transform: translateY(-50%);
+            animation: float 3s ease-in-out infinite;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 50%;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.5);
+        }
+
+        .neon-raccoon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 0 10px #ff00ff) 
+                    drop-shadow(0 0 20px #ff00ff);
+            animation: glow 2s ease-in-out infinite alternate,
+                       pulse 3s ease-in-out infinite;
+        }
+
+        .neon-raccoon.left {
+            left: 50px;
+        }
+
+        .neon-raccoon.right {
+            right: 50px;
+            transform: translateY(-50%) scaleX(-1);
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(-50%) translateX(0);
+            }
+            50% {
+                transform: translateY(-50%) translateX(-20px);
+            }
+            100% {
+                transform: translateY(-50%) translateX(0);
+            }
+        }
+
+        @keyframes glow {
+            from {
+                filter: drop-shadow(0 0 10px #ff00ff) 
+                        drop-shadow(0 0 20px #ff00ff);
+            }
+            to {
+                filter: drop-shadow(0 0 15px #00ffff) 
+                        drop-shadow(0 0 25px #00ffff);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.95);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(0.95);
+            }
+        }
+
+        .neon-raccoon.right {
+            animation-delay: 1.5s;
+        }
+
+        .neon-raccoon::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle at center, rgba(255,0,255,0.2) 0%, transparent 70%);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        .welcome-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: all 0.5s ease-out;
+        }
+
+        .welcome-content {
+            text-align: center;
+            animation: floatAnimation 3s ease-in-out infinite;
+        }
+
+        .welcome-title {
+            font-size: 4rem;
+            color: #fff;
+            margin-bottom: 1rem;
+            animation: neonPulse 1.5s ease-in-out infinite alternate;
+            text-shadow: 0 0 10px #6366f1,
+                         0 0 20px #6366f1,
+                         0 0 30px #6366f1,
+                         0 0 40px #6366f1;
+        }
+
+        .welcome-subtitle {
+            font-size: 2rem;
+            color: #94a3b8;
+            margin-bottom: 3rem;
+            animation: neonPulseSubtle 2s ease-in-out infinite alternate;
+            text-shadow: 0 0 5px rgba(99, 102, 241, 0.5),
+                         0 0 10px rgba(99, 102, 241, 0.3);
+        }
+
+        .enter-button {
+            background: linear-gradient(45deg, #6366f1, #4f46e5);
+            padding: 1.2rem 3rem;
+            font-size: 1.5rem;
+            border: none;
+            border-radius: 3rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            position: relative;
+            overflow: hidden;
+            animation: buttonGlow 2s infinite alternate;
+        }
+
+        .enter-button:hover {
+            transform: translateY(-5px);
+            animation: buttonGlowHover 1s infinite alternate;
+        }
+
+        .enter-button::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, 
+                transparent, 
+                rgba(99, 102, 241, 0.1), 
+                transparent);
+            transform: rotate(45deg);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes neonPulse {
+            from {
+                text-shadow: 0 0 10px #6366f1,
+                            0 0 20px #6366f1,
+                            0 0 30px #6366f1,
+                            0 0 40px #6366f1;
+            }
+            to {
+                text-shadow: 0 0 15px #6366f1,
+                            0 0 25px #6366f1,
+                            0 0 35px #6366f1,
+                            0 0 45px #818cf8;
+            }
+        }
+
+        @keyframes neonPulseSubtle {
+            from {
+                text-shadow: 0 0 5px rgba(99, 102, 241, 0.5),
+                            0 0 10px rgba(99, 102, 241, 0.3);
+            }
+            to {
+                text-shadow: 0 0 8px rgba(99, 102, 241, 0.7),
+                            0 0 15px rgba(99, 102, 241, 0.5);
+            }
+        }
+
+        @keyframes buttonGlow {
+            from {
+                box-shadow: 0 0 10px #6366f1,
+                           0 0 20px #6366f1,
+                           0 0 30px #6366f1;
+            }
+            to {
+                box-shadow: 0 0 15px #6366f1,
+                           0 0 25px #6366f1,
+                           0 0 35px #6366f1;
+            }
+        }
+
+        @keyframes buttonGlowHover {
+            from {
+                box-shadow: 0 0 15px #6366f1,
+                           0 0 25px #6366f1,
+                           0 0 35px #6366f1;
+            }
+            to {
+                box-shadow: 0 0 20px #6366f1,
+                           0 0 30px #6366f1,
+                           0 0 40px #6366f1;
+            }
+        }
+
+        @keyframes floatAnimation {
+            0% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-150%) rotate(45deg);
+            }
+            100% {
+                transform: translateX(150%) rotate(45deg);
+            }
+        }
+
+        /* Mobil uyumluluk */
+        @media (max-width: 768px) {
+            .neon-raccoon.left, .neon-raccoon.right {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 40px;
+                height: 40px;
+                margin: 0;
+                background: none;
+            }
+
+            .neon-raccoon.left {
+                left: -45px;
+            }
+
+            .neon-raccoon.right {
+                right: -45px;
+            }
+
+            .neon-raccoon img {
+                width: 30px;
+                height: 30px;
+            }
+
+            .neon-raccoon::before {
+                width: 40px;
+                height: 40px;
+            }
+
+            .game-container {
+                position: relative;
+                margin: 1rem auto;
+                padding: 1rem;
+                width: 90%;
+                max-width: 400px;
+            }
+
+            .content-wrapper {
+                position: relative;
+                width: 100%;
+                padding: 0 50px;
+                box-sizing: border-box;
+            }
+
+            @keyframes pulse {
+                0% {
+                    transform: scale(1);
+                    opacity: 0.5;
+                }
+                50% {
+                    transform: scale(1.1);
+                    opacity: 0.7;
+                }
+                100% {
+                    transform: scale(1);
+                    opacity: 0.5;
+                }
+            }
+        }
+
+        @media (max-width: 480px) {
+            .welcome-title {
+                font-size: 2rem;
+            }
+
+            .welcome-subtitle {
+                font-size: 1.2rem;
+            }
+
+            .enter-button {
+                padding: 0.8rem 1.5rem;
+                font-size: 1rem;
+            }
+
+            .neon-raccoon {
+                width: 60px;
+                height: 60px;
+            }
+
+            .neon-raccoon img {
+                width: 45px;
+                height: 45px;
+            }
+
+            .header {
+                font-size: 1.5rem;
+                margin: 2rem 0 1rem;
+            }
+
+            .cover-image {
+                height: 120px;
+            }
+
+            .logo {
+                width: 60px;
+                height: 60px;
+                margin: -30px auto 10px;
+            }
+        }
+
+        /* Yatay mobil cihazlar için */
+        @media (max-height: 600px) and (orientation: landscape) {
+            .welcome-content {
+                transform: scale(0.8);
+            }
+
+            .welcome-title {
+                font-size: 2rem;
+                margin-bottom: 0.3rem;
+            }
+
+            .welcome-subtitle {
+                font-size: 1.2rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .game-container {
+                margin: 0.5rem auto;
+                min-height: auto;
+            }
+
+            .cover-image {
+                height: 100px;
+            }
+
+            .logo {
+                width: 50px;
+                height: 50px;
+                margin: -25px auto 10px;
+            }
+        }
+
+        .neon-text {
+            color: #fff;
+            text-shadow: 
+                0 0 5px #fff,
+                0 0 10px #fff,
+                0 0 20px #ff1177,
+                0 0 30px #ff1177,
+                0 0 40px #ff1177,
+                0 0 55px #ff1177,
+                0 0 70px #ff1177;
+        }
+
+        .logo-container {
+            position: relative;
+            text-align: center;
+            margin-bottom: 2rem;
+            filter: drop-shadow(0 0 30px rgba(255, 17, 119, 0.8));
+        }
+
+        .music-control {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 2px solid var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+        }
+        
+        .music-control:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+        }
+        
+        .music-control i {
+            color: var(--primary-color);
+            font-size: 24px;
+        }
+
+        .hint-text {
+            margin-top: 20px;
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(255, 0, 98, 0.1);
+            border-radius: 10px;
+            font-size: 0.9em;
+            color: #333;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.5s ease-in;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            max-width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+            transition: all 0.3s ease;
+        }
+
+        .hint-label {
+            display: inline-block;
+            color: #ff0062;
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-right: 6px;
+            letter-spacing: 1.5px;
+        }
+
+        .hint-content {
+            display: inline-block;
+            margin-left: 4px;
+            color: #444;
+            font-size: 0.95em;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .game-over-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 1000;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .game-over-content {
+            text-align: center;
+            color: white;
+            padding: 2rem;
+        }
+
+        .game-over-title {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #ff0062;
+            text-shadow: 0 0 10px rgba(255, 0, 98, 0.7);
+        }
+
+        .game-over-score {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            color: #fff;
+        }
+
+        .play-again-btn {
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            background: linear-gradient(45deg, #ff0062, #ff458b);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .play-again-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 0, 98, 0.3);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="welcome-screen" id="welcomeScreen">
+        <div class="welcome-content">
+            <h1 class="welcome-title">Welcome to Raccoons</h1>
+            <p class="welcome-subtitle">NFT Community</p>
+            <button class="enter-button" id="enterButton">Enter Game</button>
+        </div>
+    </div>
+
+    <div class="game-content" style="display: none;">
+        <!-- Müzik Sistemi -->
+        <audio id="gameMusic" preload="auto">
+            <source src="{{ url_for('static', filename='music/background.mp3') }}" type="audio/mpeg">
+        </audio>
+        
+        <div class="music-control">
+            <i class="fas fa-volume-mute"></i>
+        </div>
+
+        <div class="neon-raccoon left">
+            <img src="{{ url_for('static', filename='images/raccoon-icon.png') }}" alt="Raccoon">
+        </div>
+        
+        <div class="content-wrapper">
+            <img src="{{ url_for('static', filename='images/cover.jpg') }}" alt="Cover" class="cover-image">
+            <div class="logo-container">
+                <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="Logo" class="logo">
+            </div>
+
+            <h1 class="header neon-text">Raccoons Word Game</h1>
+            <div class="game-container">
+                <button id="startGame">Start New Game</button>
+                <div id="gameArea" style="display: none;">
+                    <div class="stats">
+                        <span>Attempts Left: <span id="attemptsLeft">5</span></span>
+                        <span>Score: <span id="score">0/3</span></span>
+                    </div>
+                    <p style="text-align: center; color: var(--text-primary);">Guess the word:</p>
+                    <div id="wordDisplay" class="word-display"></div>
+                    <div class="input-container">
+                        <input type="text" id="guessInput" placeholder="Type your guess here..." autocomplete="off">
+                        <button id="submitGuess" onclick="submitGuess()">Submit</button>
+                    </div>
+                    <div id="message" class="message" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="neon-raccoon right">
+            <img src="{{ url_for('static', filename='images/raccoon-icon.png') }}" alt="Raccoon">
+        </div>
+    </div>
+
+    <div class="game-over-screen" id="gameOverScreen">
+        <div class="game-over-content">
+            <h1 class="game-over-title">Congratulations!</h1>
+            <p class="game-over-score">You've completed the game!</p>
+            <button class="play-again-btn" onclick="location.reload()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Kelimeler ve ipuçları
+        const wordHints = {
+            'token': 'A digital unit of value on the blockchain',
+            'stake': 'To lock up crypto assets to earn rewards',
+            'chain': 'A distributed ledger of transactions',
+            'nonce': 'A number used once in mining',
+            'miner': 'Someone who validates blockchain transactions',
+            'whale': 'A person holding large amounts of crypto',
+            'defi': 'Decentralized financial services',
+            'block': 'A group of validated transactions',
+            'trade': 'To exchange one crypto for another',
+            'hodl': 'To keep holding crypto long term',
+            'mint': 'To create a new NFT or token',
+            'smart': 'Self-executing code on blockchain',
+            'asset': 'Digital item stored on blockchain',
+            'proof': 'Validation method for transactions',
+            'vault': 'Secure storage for digital assets',
+            'yield': 'Returns earned from crypto investments',
+            'nodes': 'Connection points in blockchain network',
+            'coins': 'Digital currencies on blockchain',
+            'alpha': 'Early info about NFT projects',
+            'floor': 'Minimum price of an NFT collection',
+            'sweep': 'Buying multiple NFTs from collection',
+            'rarity': 'How uncommon an NFT trait is',
+            'ether': 'Native currency of Ethereum',
+            'gas': 'Transaction fee on blockchain',
+            'degen': 'Crypto trader taking high risks',
+            'fomo': 'Fear of missing out on trades',
+            'pump': 'Rapid price increase in crypto',
+            'dump': 'Sudden price drop in crypto',
+            'airdrop': 'Free tokens given to users',
+            'bridge': 'Connect different blockchains',
+            'burn': 'Permanently remove tokens',
+            'cold': 'Offline storage of crypto',
+            'fork': 'Split in blockchain protocol',
+            'gwei': 'Small unit of Ethereum',
+            'hash': 'Unique crypto transaction ID',
+            'limit': 'Set price for auto trade',
+            'paper': 'Weak hands in trading',
+            'seed': 'Recovery phrase for wallet',
+            'shill': 'Promote crypto projects',
+            'whale': 'Large crypto holder',
+            'solana': 'Fast blockchain platform',
+            'magic': 'Solana NFT marketplace',
+            'lamport': 'Smallest unit in Solana',
+            'spl': 'Solana program library token',
+            'phantom': 'Popular Solana wallet',
+            'raydium': 'Solana DEX protocol',
+            'serum': 'Decentralized exchange on Solana',
+            'wormhole': 'Cross-chain bridge for Solana',
+            'metaplex': 'NFT standard on Solana',
+            'candy': 'NFT minting machine on Solana',
+            'anchor': 'Development framework for Solana',
+            'saga': 'Solana mobile phone project',
+            'pyth': 'Oracle network on Solana',
+            'bonk': 'Popular Solana meme token'
+        };
+
+        let words = Object.keys(wordHints);
+        let currentWord = '';
+        let attempts = 5;
+        let score = 0;
+
+        // Müzik kontrolü
+        const gameMusic = document.getElementById('gameMusic');
+        const musicControl = document.querySelector('.music-control i');
+        const musicButton = document.querySelector('.music-control');
+
+        // Sayfa yüklendiğinde müziği otomatik başlat
+        window.addEventListener('load', () => {
+            gameMusic.play().catch(error => {
+                console.log("Müzik otomatik başlatılamadı:", error);
+            });
+            musicControl.className = 'fas fa-volume-up';
+        });
+
+        // İkona tıklama olayı
+        musicControl.addEventListener('click', (e) => {
+            e.stopPropagation(); // Butonun tıklama olayını engelle
+            toggleMusic();
+        });
+
+        // Butona tıklama olayı
+        musicButton.addEventListener('click', toggleMusic);
+
+        // Müzik açma/kapama fonksiyonu
+        function toggleMusic() {
+            if (gameMusic.paused) {
+                gameMusic.play();
+                musicControl.className = 'fas fa-volume-up';
+            } else {
+                gameMusic.pause();
+                musicControl.className = 'fas fa-volume-mute';
+            }
+        }
+
+        // Global değişkenler
+        let isMusicPlaying = false;
+        let firstInteraction = false;
+
+        // DOM yüklendiğinde çalışacak kod
+        document.addEventListener('DOMContentLoaded', function() {
+            const enterButton = document.querySelector('.enter-button');
+            const welcomeScreen = document.querySelector('.welcome-screen');
+            const gameContent = document.querySelector('.game-content');
+            const startGameButton = document.getElementById('startGame');
+            const gameArea = document.getElementById('gameArea');
+            const submitButton = document.getElementById('submitGuess');
+            const guessInput = document.getElementById('guessInput');
+            const audio = document.getElementById('gameMusic');
+            const musicControl = document.querySelector('.music-control');
+            const icon = musicControl.querySelector('i');
+
+            // Event listeners
+            enterButton.addEventListener('click', function() {
+                welcomeScreen.style.opacity = '0';
+                setTimeout(() => {
+                    welcomeScreen.style.display = 'none';
+                    gameContent.style.display = 'block';
+                }, 500);
+            });
+
+            startGameButton.addEventListener('click', function() {
+                this.style.display = 'none';
+                gameArea.style.display = 'block';
+                startNewGame();
+            });
+
+            submitButton.addEventListener('click', submitGuess);
+            guessInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    submitGuess();
+                }
+            });
+
+            // Müzik kontrolü
+            musicControl.addEventListener('click', function() {
+                if (audio.paused) {
+                    audio.play().then(() => {
+                        icon.className = 'fas fa-volume-up';
+                        isMusicPlaying = true;
+                    });
+                } else {
+                    audio.pause();
+                    icon.className = 'fas fa-volume-mute';
+                    isMusicPlaying = false;
+                }
+            });
+        });
+
+        function startNewGame() {
+            currentWord = words[Math.floor(Math.random() * words.length)];
+            attempts = 5;
+            document.getElementById('attemptsLeft').textContent = attempts;
+            document.getElementById('guessInput').value = '';
+            document.getElementById('message').style.display = 'none';
+            displayCurrentWord();
+        }
+
+        function submitGuess() {
+            const guess = document.getElementById('guessInput').value.toLowerCase().trim();
+            if (!guess) return;
+
+            if (guess === currentWord) {
+                score++;
+                document.getElementById('score').textContent = score + '/3';
+                showMessage('Correct! Well done!', 'success');
+                
+                if (score === 3) {
+                    showMessage('Congratulations! You won the game!', 'success');
+                    setTimeout(() => endGame(true), 1000);
+                } else {
+                    setTimeout(startNewGame, 1500);
+                }
+            } else {
+                attempts--;
+                document.getElementById('attemptsLeft').textContent = attempts;
+                
+                if (attempts === 0) {
+                    showMessage(`Game Over! The word was: ${currentWord}`, 'error');
+                    setTimeout(() => endGame(false), 1000);
+                } else {
+                    showMessage('Wrong guess. Try again!', 'error');
+                    displayCurrentWord();
+                }
+            }
+            
+            document.getElementById('guessInput').value = '';
+        }
+
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = 'message ' + type;
+            messageDiv.style.display = 'block';
+        }
+
+        function displayCurrentWord() {
+            const wordDisplay = document.getElementById('wordDisplay');
+            let displayText = currentWord[0];
+            
+            for (let i = 1; i < currentWord.length - 1; i++) {
+                displayText += '_';
+            }
+            
+            displayText += currentWord[currentWord.length - 1];
+            wordDisplay.textContent = displayText;
+
+            const hint = wordHints[currentWord];
+            const hintDisplay = document.createElement('div');
+            hintDisplay.className = 'hint-text';
+            hintDisplay.innerHTML = `
+                <span class="hint-label">HINT</span>
+                <span class="hint-content">${hint}</span>
+            `;
+            wordDisplay.appendChild(hintDisplay);
+        }
+
+        function endGame(won = false) {
+            const gameOverScreen = document.getElementById('gameOverScreen');
+            const gameOverTitle = document.querySelector('.game-over-title');
+            const gameOverScore = document.querySelector('.game-over-score');
+
+            if (won) {
+                // Konfeti efekti
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+
+                gameOverTitle.textContent = 'Congratulations!';
+                gameOverScore.textContent = `You've won with a score of ${score}/${Object.keys(wordHints).length}!`;
+            } else {
+                gameOverTitle.textContent = 'Game Over';
+                gameOverScore.textContent = `Final score: ${score}/${Object.keys(wordHints).length}`;
+            }
+
+            // Oyun bitiş ekranını göster
+            gameOverScreen.style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
